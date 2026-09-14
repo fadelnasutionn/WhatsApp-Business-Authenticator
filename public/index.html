@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Contact Verification</title>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7/dist/ionicons/ionicons.esm.js"
+      defer
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7/dist/ionicons/ionicons.js"
+      defer
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://challenges.cloudflare.com" />
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    ></script>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="glass" role="region" aria-label="Contact verification">
+
+        <div style="position:absolute; left:-9999px; top:-9999px; width:0; height:0; overflow:hidden;">
+          <div
+            class="cf-turnstile"
+            data-sitekey="0x4AAAAAABhytZUm1XdMDwO9"
+            data-theme="light"
+            data-size="flexible"
+            data-callback="onSuccess"
+            data-appearance="execute"
+          ></div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="form" id="contact-form">
+          <header>
+            <div>
+              <h1>Contact Verification</h1>
+              <p class="lead muted">
+                Please choose your preferred verification method and enter your
+                contact details.
+              </p>
+            </div>
+          </header>
+
+          <!-- Verification Method -->
+          <label>Verification Method</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input
+                type="radio"
+                name="verificationMethod"
+                value="whatsapp"
+                checked
+              />
+              WhatsApp
+            </label>
+
+            <label class="radio-option">
+              <input type="radio" name="verificationMethod" value="telegram" />
+              Telegram
+            </label>
+
+            <label class="radio-option">
+              <input type="radio" name="verificationMethod" value="email" />
+              Email
+            </label>
+          </div>
+
+          <!-- Contact Input -->
+          <label for="contact">Contact Information</label>
+          <input
+            id="contact"
+            type="text"
+            inputmode="tel"
+            placeholder="e.g. 081234567890"
+            aria-label="Contact number"
+            autocomplete="off"
+          />
+
+          <div id="contact-msg" class="form-msg" aria-live="polite"></div>
+
+          <div class="cta">
+            <button id="continueBtn" class="btn" type="button" disabled>
+              Submit
+            </button>
+            <button id="clearBtn" class="secondary" type="button" title="Clear">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Unique Code SCREEN -->
+        <div id="link-screen" class="link-screen" aria-hidden="true">
+          <header>
+            <div>
+              <h1>Start Verification</h1>
+              <p class="lead muted">
+                Use this QR code to confirm your number and receive your
+                one-time password (OTP).
+              </p>
+            </div>
+          </header>
+
+          <!-- Step indicators -->
+          <ol class="link-steps">
+            <li class="link-step">
+              <span class="step-num">1</span>
+              <span>Tap or scan the QR code.</span>
+            </li>
+            <li class="link-step">
+              <span class="step-num">2</span>
+              <span
+                >Send the pre-filled message through your previously designated
+                channel.</span
+              >
+            </li>
+            <li class="link-step">
+              <span class="step-num">3</span>
+              <span>Return here and enter the OTP code you receive.</span>
+            </li>
+          </ol>
+
+          <canvas
+            id="qrcode"
+            style="align-self: center; cursor: pointer"
+          ></canvas>
+
+          <!-- <p id="countdown" class="timer-text">Resend code in 02:00</p> -->
+
+          <div class="cta" style="margin-top: 1rem">
+            <button id="lscreen-continue-btn" class="btn" type="button">
+              Continue with OTP
+            </button>
+            <button id="lscreen-back-btn" class="secondary" type="button">
+              Back
+            </button>
+          </div>
+        </div>
+
+        <!-- OTP SCREEN -->
+        <div id="otp-screen" class="otp-screen" aria-hidden="true">
+          <header>
+            <div>
+              <h1>Verify OTP Code</h1>
+              <p class="lead muted">
+                Please enter the otp code within the next 5 minutes.
+              </p>
+            </div>
+          </header>
+
+          <p class="small">Enter the 4-digit code you received</p>
+
+          <div class="otp-box" role="group" aria-label="OTP inputs">
+            <input
+              class="otp"
+              maxlength="1"
+              inputmode="numeric"
+              aria-label="OTP digit 1"
+              autocomplete="one-time-code"
+            />
+            <input
+              class="otp"
+              maxlength="1"
+              inputmode="numeric"
+              aria-label="OTP digit 2"
+            />
+            <input
+              class="otp"
+              maxlength="1"
+              inputmode="numeric"
+              aria-label="OTP digit 3"
+            />
+            <input
+              class="otp"
+              maxlength="1"
+              inputmode="numeric"
+              aria-label="OTP digit 4"
+            />
+          </div>
+
+          <div id="otp-msg" class="form-msg" aria-live="polite"></div>
+
+          <p id="countdown" class="timer-text">Resend code in --:--</p>
+
+          <a id="wa-link" class="link" href="#" target="_blank" rel="noopener"
+            >Resend Code</a
+          >
+        </div>
+
+        <!-- SUCCESS SCREEN -->
+        <div id="success-screen" class="success-screen" aria-hidden="true">
+          <header>
+            <div class="success-icon">
+              <ion-icon name="shield-checkmark"></ion-icon>
+            </div>
+            <div>
+              <h1>Verification Successful</h1>
+              <p class="lead muted">
+                Your phone number has been successfully verified.
+              </p>
+            </div>
+          </header>
+
+          <p class="small muted">
+            You may now safely continue to your account.
+          </p>
+
+          <div class="cta">
+            <button id="successBtn" class="btn" type="button">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
