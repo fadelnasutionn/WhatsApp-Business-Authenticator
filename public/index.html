@@ -26,18 +26,6 @@
   <body>
     <div class="shell">
       <div class="glass" role="region" aria-label="Contact verification">
-
-        <div style="position:absolute; left:-9999px; top:-9999px; width:0; height:0; overflow:hidden;">
-          <div
-            class="cf-turnstile"
-            data-sitekey="0x4AAAAAABhytZUm1XdMDwO9"
-            data-theme="light"
-            data-size="flexible"
-            data-callback="onSuccess"
-            data-appearance="execute"
-          ></div>
-        </div>
-
         <!-- Contact Form -->
         <div class="form" id="contact-form">
           <header>
@@ -86,6 +74,18 @@
           />
 
           <div id="contact-msg" class="form-msg" aria-live="polite"></div>
+
+          <!-- <div style="margin: 10px 0 20px">
+            <label for="contact">Let us know you are human</label>
+            <div
+              class="cf-turnstile"
+              data-sitekey="0x4AAAAAABhytZUm1XdMDwO9"
+              data-theme="light"
+              data-size="flexible"
+              data-callback="onSuccess"
+              data-appearance="execute"
+            ></div>
+          </div> -->
 
           <div class="cta">
             <button id="continueBtn" class="btn" type="button" disabled>
@@ -215,6 +215,39 @@
 
           <div class="cta">
             <button id="successBtn" class="btn" type="button">Continue</button>
+          </div>
+        </div>
+
+        <!-- Turnstile modal, shown only when the user submits the form -->
+        <div
+          id="turnstile-container"
+          class="turnstile-modal"
+          aria-hidden="true"
+        >
+          <div
+            class="turnstile-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="turnstile-title"
+          >
+            <button
+              id="turnstile-close"
+              class="turnstile-close"
+              type="button"
+              aria-label="Close verification"
+            >
+              &times;
+            </button>
+            <h2 id="turnstile-title">Confirm you are human</h2>
+            <p class="muted">Complete the security check to continue.</p>
+            <div
+              class="cf-turnstile"
+              data-sitekey="0x4AAAAAABhytZUm1XdMDwO9"
+              data-theme="light"
+              data-size="flexible"
+              data-callback="onSuccess"
+              data-appearance="interaction-only"
+            ></div>
           </div>
         </div>
       </div>

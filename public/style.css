@@ -183,6 +183,62 @@
     font-size: 13px; font-variant-numeric: tabular-nums;
   }
 
+  .turnstile-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(2, 6, 23, 0.72);
+    border-radius: 16px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .16s ease, visibility .16s ease;
+  }
+
+  .turnstile-modal.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .turnstile-dialog {
+    position: relative;
+    width: min(100%, 360px);
+    padding: 24px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    background: #292938;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+    text-align: center;
+  }
+
+  .turnstile-dialog h2 {
+    margin-bottom: 6px;
+    font-size: 17px;
+  }
+
+  .turnstile-dialog .cf-turnstile {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+  }
+
+  .turnstile-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
 
   /* ── Link Screen ─────────────────────────── */
   .link-screen {
