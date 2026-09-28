@@ -4,6 +4,8 @@
   const COUNTDOWN_DURATION = 120;
   let timerInterval;
   let turnstileToken = null;
+  let otpRequestInFlight = false;
+  let resendRequestInFlight = false;
 
   const contactInput = document.getElementById('contact');
   const continueBtn = document.getElementById('continueBtn');
@@ -25,6 +27,8 @@
   const successScreen = document.getElementById('success-screen');
   const successBtn = document.getElementById('successBtn');
   const canvas = document.getElementById("qrcode");
+  const turnstileContainer = document.getElementById("turnstile-container");
+  const turnstileClose = document.getElementById("turnstile-close");
 
   canvas.addEventListener("click", () => {
     window.open(localStorage.getItem("link"), "_blank", "noopener,noreferrer");
@@ -32,16 +36,30 @@
 
   function updateSubmitState() {
     const hasValue = contactInput.value.trim().length > 0;
-    continueBtn.disabled = !(turnstileToken && hasValue);
+    continueBtn.disabled = !hasValue;
   }
 
   function onSuccess(token) {
     if (token) {
       turnstileToken = token;
       continueBtn.dataset.token = token;
+      closeTurnstile();
       updateSubmitState();
+      continueBtn.click();
     }
   }
+
+  function openTurnstile() {
+    turnstileContainer.classList.add("show");
+    turnstileContainer.setAttribute("aria-hidden", "false");
+  }
+
+  function closeTurnstile() {
+    turnstileContainer.classList.remove("show");
+    turnstileContainer.setAttribute("aria-hidden", "true");
+  }
+
+  turnstileClose.addEventListener("click", closeTurnstile);
 
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -197,7 +215,16 @@
       })
     });
 
-    return response.json();
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data) {
+      return {
+        success: false,
+        message: data?.message || "Failed to send verification code. Please try again."
+      };
+    }
+
+    return data;
   }
 
 
@@ -205,6 +232,8 @@
    * EVENT: SUBMIT
    * ================================*/
   continueBtn.addEventListener("click", async () => {
+    if (otpRequestInFlight) return;
+
     const selectedMethod = document.querySelector(
       'input[name="verificationMethod"]:checked'
     )?.value;
@@ -239,8 +268,14 @@
       }
     }
 
+    if (!turnstileToken) {
+      openTurnstile();
+      return;
+    }
+
     contactInput.disabled = true;
     continueBtn.disabled = true;
+    otpRequestInFlight = true;
     continueBtn.innerText = "Loading...";
 
     try {
@@ -256,9 +291,12 @@
           turnstile.reset();
         }
         turnstileToken = null;
-        continueBtn.disabled = true;
+        closeTurnstile();
+        updateSubmitState();
         return;
       }
+
+      turnstileToken = null;
 
       const { id, link, expiredAt, code } = result.data || {};
 
@@ -308,6 +346,7 @@
       console.error("OTP request failed:", error);
       showMessage(contactMsg, "Failed to process your request. Please try again.");
     } finally {
+      otpRequestInFlight = false;
       continueBtn.innerText = "Submit";
       contactInput.disabled = false;
     }
@@ -417,7 +456,10 @@
    * ENTER TO CONTINUE
    * ================================*/
   contactInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') continueBtn.click();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!continueBtn.disabled) continueBtn.click();
+    }
   });
 
 
@@ -428,6 +470,7 @@
       turnstile.reset();
     }
     turnstileToken = null;
+    closeTurnstile();
     resetAllState();
   });
 
@@ -497,6 +540,11 @@
    * RESEND CODE (differs per channel)
    * ================================*/
   waLinkEl.addEventListener('click', async (e) => {
+    if (resendRequestInFlight) {
+      e.preventDefault();
+      return;
+    }
+
     const storedChannel = localStorage.getItem("channel");
     const storedValue = localStorage.getItem("value");
 
@@ -509,6 +557,7 @@
       }
 
       const originalText = waLinkEl.textContent;
+      resendRequestInFlight = true;
       waLinkEl.textContent = "Sending...";
       waLinkEl.style.pointerEvents = "none";
 
@@ -531,6 +580,7 @@
         console.error("Resend OTP error:", err);
         showMessage(otpMsg, "Failed to resend OTP. Please try again.");
       } finally {
+        resendRequestInFlight = false;
         waLinkEl.textContent = originalText;
         waLinkEl.style.pointerEvents = "";
       }
@@ -566,10 +616,11 @@
       turnstile.reset();
     }
     turnstileToken = null;
+    closeTurnstile();
     hideLinkScreen();
     contactForm.style.display = "block";
     contactInput.disabled = false;
-    continueBtn.disabled = true; 
+    updateSubmitState();
     localStorage.clear();
     contactInput.focus();
   });
